@@ -1,5 +1,5 @@
-address_resolver/src/src/
 target/*
+
 .settings/*
 .classpath
 .project
@@ -10,9 +10,7 @@ target/*
 **/typings
 generated/
 **DS_Store
-# Easier branch switching
-springboot-petclinic-client/
-springboot-petclinic-server/
+
 **/.venv*
 **/__pycache__*
 **__pycache__**

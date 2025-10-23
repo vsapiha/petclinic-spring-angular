@@ -87,24 +87,23 @@ services:
             interval: 10s
             retries: 10
 
-# Python App that uses Elastic as database
-#    address-finder:
-#        image: training/address-finder:2.0.0
-#        container_name: address-finder
-#        networks:
-#            es_bridge:
-#        ports:
-#            - "5000:5000"
-#        environment:
-#            ELASTIC_APM_SERVER_URL: http://apm-server:${APM_SERVER_PORT:-8200}
-#            ELASTIC_APM_SERVICE_VERSION: 1.0.0
-#            ELASTIC_APM_SERVICE_NAME: petclinic-address-finder
-#            ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react
-#            ELASTICSEARCH_USER: elastic
-#            ELASTICSEARCH_URL: http://elasticsearch:9200
-#            ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
-#        depends_on:
-#            - elasticsearch
+    address-finder:
+        image: training/address-finder:2.0.0
+        container_name: address-finder
+        networks:
+            es_bridge:
+        ports:
+            - "5000:5000"
+        environment:
+            ELASTIC_APM_SERVER_URL: http://apm-server:${APM_SERVER_PORT:-8200}
+            ELASTIC_APM_SERVICE_VERSION: 1.0.0
+            ELASTIC_APM_SERVICE_NAME: petclinic-address-finder
+            ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react
+            ELASTICSEARCH_USER: elastic
+            ELASTICSEARCH_URL: https://es01:9200
+            ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+        depends_on:
+            - es01
 
     server-loadgen:
         image: training/server-loadgen:2.0.0
@@ -118,6 +117,16 @@ services:
             DATA_FILES: "/opt/data_files"
         depends_on:
             - petclinic-server
+
+#    client-loadgen:
+#        image: training/client-loadgen:2.0.0
+#        container_name: client-loadgen
+#        networks:
+#            es_bridge:
+#        environment:
+#            PETCLINIC_BASE_URL: http://spring-petclinic-client:${CLIENT_SERVER_PORT:-3000}
+#        depends_on:
+#            - spring-petclinic-client
 
 volumes:
     mysql_data:

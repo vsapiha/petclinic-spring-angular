@@ -2,7 +2,9 @@ FROM training/base:2.0.0
 
 RUN dnf config-manager --set-enabled ol9_appstream && \
     dnf update -y && \
-    dnf install -y gcc gcc-c++ make python3.9 python3-pip nodejs:18 npm && \
+    dnf install -y gcc gcc-c++ make python3.9 python3-pip nodejs npm && \
+    dnf module enable nodejs:18 && \
+    dnf update nodejs && \
     ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /usr/src/

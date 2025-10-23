@@ -38,4 +38,5 @@ COPY users.csv /home/chrome/
 COPY windows_users.csv /home/chrome/
 COPY zip_codes.csv /home/chrome/
 COPY single_slow_owner.js /home/chrome/
+
 CMD ["node_modules/.bin/pm2-docker", "processes.config.js"]

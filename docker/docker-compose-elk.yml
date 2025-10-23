@@ -2,7 +2,6 @@ services:
 
     setup:
         image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}-arm64
-        # container_name: setup
         profiles:
             - setup
         volumes:
@@ -34,7 +33,6 @@ services:
 
     es01:
         image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}-arm64
-        # container_name: es01
         restart: unless-stopped
         volumes:
             - "./elk/certificates/certs:/usr/share/elasticsearch/config/certs"
@@ -84,7 +82,6 @@ services:
             es01:
                 condition: service_healthy
         image: docker.elastic.co/kibana/kibana:${STACK_VERSION}-arm64
-        # container_name: kibana
         volumes:
             - "./elk/certificates/certs:/usr/share/kibana/config/certs"
             - "./elk/config/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro"
@@ -164,7 +161,6 @@ services:
 
     nginx:
         image: nginx:latest
-        #container_name: nginx
         restart: unless-stopped
         ports:
             - "443:443"
