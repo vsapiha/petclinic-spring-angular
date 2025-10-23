@@ -14,7 +14,7 @@ RUN python3 -m pip install --upgrade pip && \
     source .venv/bin/activate
 #RUN pip install gunicorn json-logging-py
 
-RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
 
 #
 #COPY config.py .
