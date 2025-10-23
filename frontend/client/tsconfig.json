@@ -1,21 +1,27 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "jsx": "react",
-    "module": "commonjs",
-    "noImplicitAny": false,
-    "preserveConstEnums": true,
-    "removeComments": true,
-    "target": "ES6",
-    "allowJs": true,
-    "outDir": "dist",
+    "outDir": "./dist/out-tsc",
+    "baseUrl": "src",
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
+    "module": "es2020",
+    "useDefineForClassFields": false
   },
-  "exclude": [
-    "node_modules",
-    "typings/browser.d.ts",
-    "typings/browser",
-    "tests"
-  ]
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInputTypes": true,
+    "strictNullInputTypes": true
+  }
 }

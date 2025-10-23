@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-const settings = require('../config')
-var apm = require('elastic-apm-node').start({
-  serviceName: settings.apm_service_name,
-  serviceVersion: settings.apm_service_version,
-  serverUrl: settings.apm_server,
-  captureBody: "all",
-  errorOnAbortedRequests: true,
-  captureErrorLogStackTraces: "always",
-  sourceLinesErrorAppFrames: 10,
-  sourceLinesErrorLibraryFrames: 10,
-  sourceLinesSpanAppFrames: 10,
-  sourceLinesSpanLibraryFrames: 10,
-  transactionMaxSpans: -1,
-  asyncHooks: false
-})
+// const settings = require('../config')
+// var apm = require('elastic-apm-node').start({
+//   serviceName: settings.apm_service_name,
+//   serviceVersion: settings.apm_service_version,
+//   serverUrl: settings.apm_server,
+//   captureBody: "all",
+//   errorOnAbortedRequests: true,
+//   captureErrorLogStackTraces: "always",
+//   sourceLinesErrorAppFrames: 10,
+//   sourceLinesErrorLibraryFrames: 10,
+//   sourceLinesSpanAppFrames: 10,
+//   sourceLinesSpanLibraryFrames: 10,
+//   transactionMaxSpans: -1,
+//   asyncHooks: false
+// })
 
 /**
  * Module dependencies.
  */
 
 var app = require('../app');
-var debug = require('debug')('react-backend:server');
+// var debug = require('debug')('react-backend:server');
 var http = require('http');
 
 /**
@@ -100,5 +100,7 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  // debug('Listening on ' + bind);
+
+  console.log('Listening on port ' + bind);
 }

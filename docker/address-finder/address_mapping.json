@@ -1,0 +1,25 @@
+{
+  "mappings": {
+    "properties": {
+      "city": {
+        "type": "keyword",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "state": {
+        "type": "keyword",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "zip_code": {
+        "type": "keyword"
+      }
+    }
+  }
+}

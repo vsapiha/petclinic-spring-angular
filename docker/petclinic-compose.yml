@@ -1,0 +1,120 @@
+services:
+
+    # docker run -it --rm -p 3306:3306 -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_USER=petclinic -e MYSQL_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic training/mysql:2.0.0 bash
+    mysql:
+        image: training/mysql:2.0.0
+        container_name: mysql
+        hostname: mysql
+        restart: always
+        stdin_open: true
+        networks:
+            es_bridge:
+        volumes:
+            - "mysql_data:/var/lib/mysql:rw"
+            - "mysql_logs:/var/log/mysql:rw"
+        ports:
+            - "3306:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=petclinic
+            - MYSQL_ALLOW_EMPTY_PASSWORD=true
+            - MYSQL_USER=petclinic
+            - MYSQL_PASSWORD=petclinic
+            - MYSQL_DATABASE=petclinic
+        healthcheck:
+            interval: 5s
+            retries: 10
+            test: mysqladmin ping -h localhost --user petclinic --password=petclinic | grep -v "warning" | grep "is alive"
+
+    petclinic-server:
+        image: training/petclinic-server:2.0.0
+        container_name: petclinic-server
+        hostname: petclinic-server
+        networks:
+            es_bridge:
+        ports:
+            - "8000:8000"
+        restart: always
+        stdin_open: true
+        #    environment:
+        #      - SPRING_PROFILES_ACTIVE=mysql,spring-data-jpa
+        #      - ELASTIC_APM_ACTIVE=true
+        #      - ELASTIC_APM_LOG_LEVEL=info
+        #      - ELASTIC_APM_SERVICE_NAME=petclinic-java
+        #      - ELASTIC_APM_APPLICATION_PACKAGES=org.springframework.samples.petclinic
+        #      - ELASTIC_APM_SERVER_URL=http://fleet-server:8200
+        #      - ELASTIC_APM_SECRET_TOKEN=nonprodpwd
+        #      - ELASTIC_APM_ENVIRONMENT=dev
+        #    logging:
+        #      driver: 'json-file'
+        #      options:
+        #        max-size: '2m'
+        #        max-file: '5'
+        depends_on:
+            mysql:
+                condition: service_healthy
+        healthcheck:
+            test: [ "CMD", "curl", "--write-out", "'HTTP %{http_code}'", "--silent", "--output", "/dev/null", "http://localhost:8000/" ]
+            interval: 5s
+            retries: 10
+
+    petclinic-client:
+        image: training/petclinic-client:2.0.0
+        container_name: petclinic-client
+        hostname: petclinic-client
+        networks:
+            es_bridge:
+        ports:
+            - "0.0.0.0:4000:4000"
+            - "0.0.0.0:8080:8080"
+        restart: always
+        stdin_open: true
+        environment:
+            API_SERVER: 'http://petclinic-server:8000'
+        #      ELASTIC_APM_SERVICE_VERSION: 1.0.0
+        #      ELASTIC_APM_SERVICE_NAME: petclinic-react-server
+        #      ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react-client
+        #      SERVER_PORT: 3000
+        #      NODE_ENV: production
+        #      ELASTICSEARCH_USERNAME: elastic
+        #      ELASTICSEARCH_URL: http://elasticsearch:9200
+        #      ELASTICSEARCH_PASSWORD: JcRZwmwBPduguAuv
+        #      PETCLINIC_INTERNAL_URL: "http://petclinic-client:3000"
+        #      PETCLINIC_EXTERNAL_URL: "http://petclinic-client:3000"
+        #      ADDRESS_SERVER: "http://address-finder:5000"
+        depends_on:
+            petclinic-server:
+                condition: service_healthy
+#      - address-finder
+        healthcheck:
+            test: ["CMD", "curl", "--write-out", "'HTTP %{http_code}'", "--silent", "--output", "/dev/null", "http://petclinic-client:4000/"]
+            interval: 10s
+            retries: 10
+
+    address-finder:
+        image: training/address-finder:${ES_VERSION:-7.4.0}
+        container_name: address-finder
+        networks:
+            es_bridge:
+        ports:
+            - "5000:5000"
+#        environment:
+#            ELASTIC_APM_SERVER_URL: http://apm-server:${APM_SERVER_PORT:-8200}
+#            ELASTIC_APM_SERVICE_VERSION: 1.0.0
+#            ELASTIC_APM_SERVICE_NAME: petclinic-address-finder
+#            ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react
+#            ELASTICSEARCH_USER: elastic
+#            ELASTICSEARCH_URL: http://elasticsearch:9200
+#            ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+        depends_on:
+            - elasticsearch
+
+volumes:
+    mysql_data:
+        driver: local
+    mysql_logs:
+        driver: local
+
+networks:
+    es_bridge:
+        name: es_bridge
+        external: true

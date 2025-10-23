@@ -1,8 +1,0 @@
-[mysqld]
-skip_ssl
-long_query_time = .1
-slow_query_log = 1
-slow_query_log_file="/var/log/mysql/slowlog.log"
-log_queries_not_using_indexes = 1
-log_slow_admin_statements = 1
-log_error_verbosity = 3
