@@ -1,0 +1,27 @@
+---
+## Default Elasticsearch configuration from Elasticsearch base image.
+## https://github.com/elastic/elasticsearch/blob/main/distribution/docker/src/docker/config/elasticsearch.yml
+#
+# cluster.name: docker-cluster
+node.name: es01
+network.host: 0.0.0.0
+
+cluster.name: demo
+discovery.type: single-node
+
+bootstrap.memory_lock: false
+# Not in version 8.15.0 ???
+# bootstrap.system_call_filter: false
+
+# Not in version 8.15.0 ???
+#node.master: true
+#node.data: false
+#node.ingest: true
+
+## X-Pack settings
+## see https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html
+#
+
+xpack.ml.enabled: false
+#xpack.security.enabled: false
+#xpack.license.self_generated.type: trial

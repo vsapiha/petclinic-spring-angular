@@ -15,7 +15,7 @@ RUN wget -O maven.tar.gz "https://archive.apache.org/dist/maven/maven-3/$maven_v
     wget -O maven.tar.gz.sha512 "https://downloads.apache.org/maven/maven-3/$maven_version/binaries/apache-maven-$maven_version-bin.tar.gz.sha512" && \
     echo "$(cat maven.tar.gz.sha512)  maven.tar.gz" | sha512sum --check && \
     tar -xzf maven.tar.gz -C /opt && \
-    mv /opt/apache-maven-$maven_version /opt/maven && \
+    mv /opt/apache-maven-$maven_version $MAVEN_HOME && \
     rm maven.tar.gz maven.tar.gz.sha512
 
 #build the application
@@ -23,19 +23,15 @@ WORKDIR /usr/src/java-code
 RUN git clone https://github.com/vsapiha/petclinic-spring-angular.git && \
     mvn -q -B -f /usr/src/java-code/petclinic-spring-angular/pom.xml package -DskipTests
 
+
 WORKDIR /home/elastic
 
-RUN mkdir /java-agent
 RUN cp -v /usr/src/java-code/spring-petclinic/target/spring-petclinic-1.5.16.jar /home/elastic/
-
-# COPY spring-petclinic-1.5.16.jar .
-COPY elastic-apm-agent-1.55.0.jar ./java-agent
-COPY opentelemetry-javaagent-2.18.0.jar ./java-agent
 
 COPY conf/ /home/elastic
 COPY scripts/ /root/start-scripts/
 
-#RUN wget -O /java-agent/elastic-apm-agent-1.55.0.jar https://search.maven.org/remotecontent?filepath=co/elastic/apm/elastic-apm-agent/1.55.0/elastic-apm-agent-1.55.0.jar
+RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
 RUN chown elastic:elastic /home/elastic/*.jar
 RUN chown elastic:elastic /home/elastic/java-agent

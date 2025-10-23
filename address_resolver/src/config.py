@@ -2,15 +2,16 @@ import os
 
 
 class Config(object):
-    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL','localhost:9200')
+    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL','elasticsearch:9200')
     ELASTICSEARCH_USER = os.getenv('ELASTICSEARCH_USER','elastic')
-    ELASTICSEARCH_PASSWORD = os.getenv('ELASTICSEARCH_PASSWORD', 'changeme')
-    ELASTICSEARCH_VALIDATE_CERTS = os.getenv('ELASTICSEARCH_VALIDATE_CERTS', 'true')
+    ELASTICSEARCH_PASSWORD = os.getenv('ELASTICSEARCH_PASSWORD', 'JcRZwmwBPduguAuv')
+    ELASTICSEARCH_VALIDATE_CERTS = os.getenv('ELASTICSEARCH_VALIDATE_CERTS', 'false')
     ADDRESSES_PER_PAGE=int(os.getenv('ADDRESSES_PER_PAGE','25'))
     ADDRESS_INDEX = os.getenv('ADDRESS_INDEX','address')
     ELASTIC_APM = {
         'SERVICE_NAME': os.getenv('ELASTIC_APM_SERVICE_NAME','address-finder'),
-        'SERVER_URL': os.getenv('ELASTIC_APM_SERVER_URL','http://localhost:8200'),
+        'SECRET_TOKEN': os.getenv('ELASTIC_APM_SECRET_TOKEN','nonprodpwd'),
+        'SERVER_URL': os.getenv('ELASTIC_APM_SERVER_URL','http://fleet-server:8200'),
         'SERVICE_VERSION': os.getenv('ELASTIC_APM_SERVER_URL','1.0'),
         'COLLECT_LOCAL_VARIABLES': os.getenv('ELASTIC_APM_COLLECT_LOCAL_VARIABLES','all'),
         'SOURCE_LINES_ERROR_APP_FRAMES': os.getenv('ELASTIC_APM_SOURCE_LINES_ERROR_APP_FRAMES','10'),

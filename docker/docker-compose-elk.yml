@@ -1,0 +1,192 @@
+services:
+
+    setup:
+        image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}-arm64
+        # container_name: setup
+        profiles:
+            - setup
+        volumes:
+            - "./elk/certificates/certs:/usr/share/elasticsearch/config/certs"
+        user: "0"
+        command: >
+            bash -c '
+                if [ x${ELASTIC_PASSWORD} == x ]; then
+                    echo "Set the ELASTIC_PASSWORD environment variable in the .env file";
+                    exit 1;
+                elif [ x${KIBANA_PASSWORD} == x ]; then
+                    echo "Set the KIBANA_PASSWORD environment variable in the .env file";
+                    exit 1;
+                fi;
+            
+                echo "Waiting for Elasticsearch availability";
+                until curl -s --cacert config/certs/ca/root-ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 5; done;
+                echo "Setup password for Kibana, Logstash, etc.";
+                until curl -s -X POST --cacert config/certs/ca/root-ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+                echo "All done!";
+            '
+        healthcheck:
+            test: [ "CMD-SHELL", "[ -f config/certs/es01/es01.crt ]" ]
+            interval: 1s
+            timeout: 5s
+            retries: 120
+        networks:
+            es_bridge:
+
+    es01:
+        image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}-arm64
+        # container_name: es01
+        restart: unless-stopped
+        volumes:
+            - "./elk/certificates/certs:/usr/share/elasticsearch/config/certs"
+            - "./elk/config/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro"
+            - "es01_data:/usr/share/elasticsearch/data"
+        environment:
+            #- node.name=es01
+            - cluster.name=${CLUSTER_NAME}
+            #- discovery.type=single-node
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+            #- bootstrap.memory_lock=true
+            #- bootstrap.system_call_filter=false
+            - xpack.security.enabled=true
+            - xpack.security.http.ssl.enabled=true
+            - xpack.security.http.ssl.key=certs/es01/es01.key
+            - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+            - xpack.security.http.ssl.certificate_authorities=certs/ca/root-ca.crt
+            - xpack.security.transport.ssl.enabled=true
+            - xpack.security.transport.ssl.key=certs/es01/es01.key
+            - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+            - xpack.security.transport.ssl.certificate_authorities=certs/ca/root-ca.crt
+            - xpack.security.transport.ssl.verification_mode=certificate
+            - xpack.license.self_generated.type=${LICENSE}
+            - xpack.ml.use_auto_machine_memory_percent=true
+            - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+        # mem_limit: ${ES_MEM_LIMIT}
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        healthcheck:
+            test: [
+                "CMD-SHELL",
+                "[ -f config/certs/es01/es01.crt ] && curl -s --cacert config/certs/ca/root-ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'"
+            ]
+            interval: 1s
+            timeout: 5s
+            retries: 120
+        labels:
+            co.elastic.logs/module: elasticsearch
+        networks:
+            es_bridge:
+                aliases:
+                    - es01
+    kibana:
+        depends_on:
+            es01:
+                condition: service_healthy
+        image: docker.elastic.co/kibana/kibana:${STACK_VERSION}-arm64
+        # container_name: kibana
+        volumes:
+            - "./elk/certificates/certs:/usr/share/kibana/config/certs"
+            - "./elk/config/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro"
+            - "kibana_data:/usr/share/kibana/data"
+        environment:
+            - SERVERNAME=kibana
+            - ELASTICSEARCH_HOSTS=https://es01:9200
+            - ELASTICSEARCH_USERNAME=kibana_system
+            - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+            - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/root-ca.crt
+            - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+            - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+            - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+            - TELEMETRY_ENABLED=false
+            - XPACK_REPORTING_KIBANASERVER_HOSTNAME=localhost
+            - SERVER_SSL_ENABLED=true
+            - SERVER_SSL_CERTIFICATE=config/certs/kibana/kibana.crt
+            - SERVER_SSL_KEY=config/certs/kibana/kibana.key
+            - SERVER_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/root-ca.crt
+            - XPACK_FLEET_AGENTS_ENABLED=false
+        healthcheck:
+            test: [ "CMD-SHELL", "curl -s --cacert config/certs/ca/root-ca.crt -I https://localhost:5601 | grep -q 'HTTP/1.1 302 Found'" ]
+            interval: 10s
+            timeout: 10s
+            retries: 120
+        labels:
+            co.elastic.logs/module: kibana
+        networks:
+            es_bridge:
+                aliases:
+                    - kibana
+    apm-server:
+        image: docker.elastic.co/apm/apm-server:${STACK_VERSION}-arm64
+        ports:
+            - "8200:8200"
+        volumes:
+            - "./elk/certificates/certs:/usr/share/apm-server/config/certs"
+        command: >
+            apm-server -e
+                -E apm-server.rum.enabled=true
+                -E apm-server.auth.anonymous.enabled=true
+                -E apm-server.host=0.0.0.0:8200
+                -E apm-server.frontend.enabled=true
+                -E apm-server.frontend.rate_limit=100000
+                -E apm-server.read_timeout=1m
+                -E apm-server.shutdown_timeout=2m
+                -E apm-server.write_timeout=1m
+                -E apm-server.kibana.enabled=true
+                -E apm-server.kibana.host=kibana:5601
+                -E apm-server.kibana.protocol=http
+                -E apm-server.kibana.username=kibana_system
+                -E apm-server.kibana.password=${KIBANA_PASSWORD}
+                -E output.elasticsearch.hosts=["es01:9200"]
+                -E output.elasticsearch.username=elastic
+                -E output.elasticsearch.password=${ELASTIC_PASSWORD}
+                -E output.elasticsearch.protocol=https
+                -E output.elasticsearch.ssl.certificate_authorities=config/certs/ca/root-ca.crt
+                -E setup.kibana.host=kibana:5601
+                -E setup.kibana.username=elastic
+                -E setup.kibana.password=${ELASTIC_PASSWORD}
+                -E setup.template.enabled=true
+                -E setup.template.overwrite=true
+                -E setup.template.settings.index.number_of_replicas=0
+                -E xpack.monitoring.enabled=true
+                -E logging.metrics.enabled=true
+                -E ilm.enabled=true
+                --strict.perms=false
+        cap_add: [ "CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID" ]
+        cap_drop: [ "ALL" ]
+        networks:
+            es_bridge:
+                aliases:
+                    - apm-server
+        depends_on:
+            es01:
+                condition: service_healthy
+
+    nginx:
+        image: nginx:latest
+        #container_name: nginx
+        restart: unless-stopped
+        ports:
+            - "443:443"
+        volumes:
+            - "./elk/certificates/certs:/etc/nginx/ssl"
+            - "./elk/config/nginx/nginx.conf:/etc/nginx/nginx.conf"
+            - "./elk/config/nginx/conf.d:/etc/nginx/conf.d"
+        depends_on:
+            es01:
+                condition: service_healthy
+            kibana:
+                condition: service_healthy
+        networks:
+            es_bridge:
+
+networks:
+    es_bridge:
+        name: es_bridge
+        external: true
+
+volumes:
+    es01_data:
+        driver: local
+    kibana_data:
+        driver: local

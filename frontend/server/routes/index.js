@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* Root endpoint */
 router.get('/', function(req, res, next) {
-  res.json({"service":"react-petclinic-server"});
+  res.json({"service":"petclinic-server"});
 });
 
 module.exports = router;

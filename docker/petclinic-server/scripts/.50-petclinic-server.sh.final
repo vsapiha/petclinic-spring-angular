@@ -1,8 +1,0 @@
-#!/bin/bash
-
-java -javaagent:/home/elastic/java-agent/elastic-apm-agent-1.55.0.jar \
-    -Delastic.apm.service_name=petclinic-java \
-    -Delastic.apm.application_packages=org.springframework.samples.petclinic \
-    -Delastic.apm.server_urls=http://fleet-server:8200 \
-    -Delastic.apm.secret_token=nonprodpwd \
-    -jar /home/elastic/spring-petclinic-1.5.16.jar &
