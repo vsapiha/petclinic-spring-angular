@@ -20,8 +20,8 @@ RUN wget -O maven.tar.gz "https://archive.apache.org/dist/maven/maven-3/$maven_v
 
 #build the application
 WORKDIR /usr/src/java-code
-RUN git clone https://github.com/elastic/spring-petclinic.git && \
-    mvn -q -B -f /usr/src/java-code/spring-petclinic/pom.xml package -DskipTests
+RUN git clone https://github.com/vsapiha/petclinic-spring-angular.git && \
+    mvn -q -B -f /usr/src/java-code/petclinic-spring-angular/pom.xml package -DskipTests
 
 WORKDIR /home/elastic
 
