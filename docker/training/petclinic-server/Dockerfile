@@ -34,7 +34,7 @@ COPY scripts/ /root/start-scripts/
 RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
 RUN chown elastic:elastic /home/elastic/*.jar
-RUN chown elastic:elastic /home/elastic/java-agent
+
 RUN chmod a+x /root/start-scripts/*
 
 EXPOSE 8080
