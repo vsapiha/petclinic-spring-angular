@@ -16,9 +16,13 @@ KIBANA_KEY="$TARGET_DIR/kibana/kibana.key"
 KIBANA_CSR="$TARGET_DIR/kibana/kibana.csr"
 KIBANA_CERT="$TARGET_DIR/kibana/kibana.crt"
 
-APM_KEY="$TARGET_DIR/apm/apm.key"
-APM_CSR="$TARGET_DIR/apm/apm.csr"
-APM_CERT="$TARGET_DIR/apm/apm.crt"
+APM_SERVER_KEY="$TARGET_DIR/apm-server/apm-server.key"
+APM_SERVER_CSR="$TARGET_DIR/apm-server/apm-server.csr"
+APM_SERVER_CERT="$TARGET_DIR/apm-server/apm-server.crt"
+
+FLEET_SERVER_KEY="$TARGET_DIR/fleet-server/fleet-server.key"
+FLEET_SERVER_CSR="$TARGET_DIR/fleet-server/fleet-server.csr"
+FLEET_SERVER_CERT="$TARGET_DIR/fleet-server/fleet-server.crt"
 
 NGINX_KEY="$TARGET_DIR/nginx/nginx.key"
 NGINX_CSR="$TARGET_DIR/nginx/nginx.csr"
@@ -53,7 +57,7 @@ function clean() {
     find "$TARGET_DIR" -type f \( -name "*.crt" -o -name "*.key" -o -name "*.csr" -o -name "*.srl" \) -exec rm -f {} +
     find "$TARGET_DIR" -type d -empty -delete
 
-    mkdir -p $TARGET_DIR/{ca,es01,kibana,nginx,apm}
+    mkdir -p $TARGET_DIR/{ca,es01,kibana,nginx,apm-server,fleet-server}
 }
 
 function test() {
@@ -95,8 +99,9 @@ case "$1" in
         generate_root
         generate_certificate $CA_KEY $CA_CERT $ES01_KEY $ES01_CSR $ES01_CERT elk_es01.cnf "Create ES01 PK, CSR and sign it...($DOMAIN)"
         generate_certificate $CA_KEY $CA_CERT $KIBANA_KEY $KIBANA_CSR $KIBANA_CERT elk_kibana.cnf "Create KIBANA PK, CSR and sign it...($DOMAIN)"
-        generate_certificate $CA_KEY $CA_CERT $APM_KEY $APM_CSR $APM_CERT elk_apm.cnf "Create APM PK, CSR and sign it...($DOMAIN)"
         generate_certificate $CA_KEY $CA_CERT $NGINX_KEY $NGINX_CSR $NGINX_CERT elk_nginx.cnf "Create NGINX PK, CSR and sign it...($DOMAIN)"
+        generate_certificate $CA_KEY $CA_CERT $APM_SERVER_KEY $APM_SERVER_CSR $APM_SERVER_CERT elk_apm_server.cnf "Create APM SERVER PK, CSR and sign it...($DOMAIN)"
+        generate_certificate $CA_KEY $CA_CERT $FLEET_SERVER_KEY $FLEET_SERVER_CSR $FLEET_SERVER_CERT elk_fleet_server.cnf "Create FLEET SERVER PK, CSR and sign it...($DOMAIN)"
         ;;
     clean)
         echo "Running lean commands..."
@@ -106,8 +111,9 @@ case "$1" in
         echo "Generating ELK certificates..."
         generate_certificate $CA_KEY $CA_CERT $ES01_KEY $ES01_CSR $ES01_CERT elk_es01.cnf "Create ES01 PK, CSR and sign it...($DOMAIN)"
         generate_certificate $CA_KEY $CA_CERT $KIBANA_KEY $KIBANA_CSR $KIBANA_CERT elk_kibana.cnf "Create KIBANA PK, CSR and sign it...($DOMAIN)"
-        generate_certificate $CA_KEY $CA_CERT $APM_KEY $APM_CSR $APM_CERT elk_apm.cnf "Create APM PK, CSR and sign it...($DOMAIN)"
         generate_certificate $CA_KEY $CA_CERT $NGINX_KEY $NGINX_CSR $NGINX_CERT elk_nginx.cnf "Create NGINX PK, CSR and sign it...($DOMAIN)"
+        generate_certificate $CA_KEY $CA_CERT $APM_SERVER_KEY $APM_SERVER_CSR $APM_SERVER_CERT elk_apm_server.cnf "Create APM SERVER PK, CSR and sign it...($DOMAIN)"
+        generate_certificate $CA_KEY $CA_CERT $FLEET_SERVER_KEY $FLEET_SERVER_CSR $FLEET_SERVER_CERT elk_fleet_server.cnf "Create FLEET SERVER PK, CSR and sign it...($DOMAIN)"
         ;;
     test)
         echo "Running domain commands..."
@@ -115,7 +121,7 @@ case "$1" in
         ;;
     *)
         echo "Usage: $0 {all|clean|domain}"
-        echo "List of domains: apm, es01, kibana, nginx"
+        echo "List of domains: apm-server, fleet-server, es01, kibana, nginx"
         exit 1
         ;;
 esac

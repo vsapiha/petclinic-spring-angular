@@ -1,5 +1,5 @@
 gen:
-	./certs-gen.sh
+	./certs-gen.sh all
 
 add:
 	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./certs/ca/root-ca.crt

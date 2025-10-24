@@ -1,8 +1,121 @@
-server.host: "0.0.0.0"
-
 telemetry.enabled: false
 
 monitoring.ui.container.elasticsearch.enabled: false
 monitoring.ui.container.logstash.enabled: false
 
+server.host: 0.0.0.0
 server.publicBaseUrl: https://kibana.petclinic.lab
+
+xpack.encryptedSavedObjects.encryptionKey: NdRgUkXn2r5u8x/A?D(G+KbPeShVmYq3s6v9y$B&E)H@McQfTjWnZr4u7w!z%C*F
+
+#xpack.actions.preconfigured:
+#    my-email:
+#        name: Demo emails
+#        actionTypeId: .email
+#        config:
+#            from: alerts-noreply@petclinic.lab
+#            host: email-smtp.eu-central-1.amazonaws.com
+#            port: 465
+#            secure: true
+#        secrets:
+#            user: ABCDEFGHIGKLMNOP
+
+xpack.fleet:
+    isAirGapped: false
+    agents:
+        enabled: true
+# https://www.elastic.co/docs/reference/kibana/configuration-reference/fleet-settings#_fleet_settings
+# openssl x509 -fingerprint -sha256 -noout -in elk/certificates/certs/ca/root-ca.crt | awk -F"=" {' print $2 '} | sed s/://g | base64
+# openssl x509 -fingerprint -sha256 -noout -in elk/certificates/certs/ca/root-ca.crt | sed 's/sha256 Fingerprint=//; s/://g'
+#        fleet_server.hosts: ["https://fleet-server:8220"]
+#        elasticsearch:
+#            hosts: ["https://es01:9200"]
+#            ca_sha256: QUVERkVDRDZGNTU1QTdBQUQ1NUE2NzYzNTIwMzdBNTk0QTM1NUIxQkIwRDhENDc0NTYwQkZENDBFRTM5RTdDOQo=
+
+# https://www.elastic.co/docs/reference/kibana/configuration-reference/fleet-settings#_preconfiguration_settings_for_advanced_use_cases
+    packages:
+    -   name: apm
+        version: latest
+    -   name: fleet_server
+        version: latest
+#    -   name: elastic_agent
+#        version: latest
+#    -   name: system
+#        version: latest
+#    -   name: docker
+#        version: latest
+
+    agentPolicies:
+    -   name: Default Fleet Server policy
+        description: Fleet server policy with APM and System logs and metrics enabled
+        id: default-policy
+
+        is_default: false
+        is_managed: true
+        is_default_fleet_server: false
+
+        namespace: default
+        monitoring_enabled:
+            - logs
+            - metrics
+
+        package_policies:
+            -   name: Fleet Server
+                id: fleet-server
+                package:
+                    name: fleet_server
+                inputs:
+                    -   type: fleet-server
+                        keep_enabled: true
+                        vars:
+                            -   name: host
+                                value: 0.0.0.0
+                                frozen: true
+                            -   name: port
+                                value: 8220
+                                frozen: true
+
+            -   name: Elastic APM
+                id: apm-server
+                package:
+                    name: apm
+                inputs:
+                    -   type: apm
+                        keep_enabled: true
+                        vars:
+                            -   name: host
+                                value: "0.0.0.0:8200"
+                                frozen: true
+                            -   name: url
+                                value: "http://0.0.0.0:8200"
+                                frozen: true
+#                            -   name: api_key_enabled
+#                                value: true
+#                            -   name: secret_token
+#                                value: "pe!eoe@8"
+                            -   name: enable_rum
+                                value: true
+                                frozen: true
+
+#            -   name: System
+#                id: system
+#                package:
+#                    name: system
+#                inputs:
+#                    -   type: logfile
+#                        enabled: false
+#                    -   type: winlog
+#                        enabled: false
+#
+#            -   name: Elastic Agent
+#                package:
+#                    name: elastic_agent
+#
+#            -   name: Docker
+#                package:
+#                    name: docker
+#                inputs:
+#                -   type: filestream
+#                    enabled: true
+#                -   type: docker/metrics
+#                    enabled: false

@@ -27,7 +27,6 @@
 		<cobertura.version>2.7</cobertura.version>
 
         <start-class>org.springframework.samples.petclinic.PetClinicApplication</start-class>
-
 	</properties>
 
 	<!-- repository for springfox plugin -->

@@ -10,13 +10,13 @@ distinguished_name = dn
 C=NL
 O=petclinic.lab
 OU=DevSecMlOps
-CN=apm
+CN=fleet-server
 
 [ req_ext ]
 subjectAltName = @alt_names
 
 [ alt_names ]
-DNS.1 = apm
-DNS.2 = apm.petclinic.lab
+DNS.1 = fleet-server
+DNS.2 = fleet-server.petclinic.lab
 DNS.3 = localhost
 IP.1 = 127.0.0.1
