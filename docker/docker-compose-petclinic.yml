@@ -87,36 +87,35 @@ services:
             interval: 10s
             retries: 10
 
-    address-finder:
-        image: training/address-finder:2.0.0
-        container_name: address-finder
-        networks:
-            es_bridge:
-        ports:
-            - "5000:5000"
-        environment:
-            ELASTIC_APM_SERVER_URL: http://apm-server:${APM_SERVER_PORT:-8200}
-            ELASTIC_APM_SERVICE_VERSION: 1.0.0
-            ELASTIC_APM_SERVICE_NAME: petclinic-address-finder
-            ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react
-            ELASTICSEARCH_USER: elastic
-            ELASTICSEARCH_URL: https://es01:9200
-            ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
-        depends_on:
-            - es01
-
-    server-loadgen:
-        image: training/server-loadgen:2.0.0
-        container_name: server-loadgen
-        networks:
-            es_bridge:
-        environment:
-            ENDPOINT_PORT: 8000
-            ENDPOINT_BASE: petclinic-server
-            ENDPOINT_PROTOCOL: http
-            DATA_FILES: "/opt/data_files"
-        depends_on:
-            - petclinic-server
+#    address-finder:
+#        image: training/address-finder:2.0.0
+#        container_name: address-finder
+#        networks:
+#            es_bridge:
+#        ports:
+#            - "5000:5000"
+#        environment:
+#            # ELASTIC_APM_SERVER_URL: http://apm-server:${APM_SERVER_PORT:-8200}
+#            ELASTIC_APM_SERVER_URL: http://fleet-server:${APM_SERVER_PORT:-8200}
+#            ELASTIC_APM_SERVICE_VERSION: 1.0.0
+#            ELASTIC_APM_SERVICE_NAME: petclinic-address-finder
+#            ELASTIC_APM_CLIENT_SERVICE_NAME: petclinic-react
+#            ELASTICSEARCH_USER: elastic
+#            ELASTICSEARCH_URL: https://es01:9200
+#            ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+#
+#    server-loadgen:
+#        image: training/server-loadgen:2.0.0
+#        container_name: server-loadgen
+#        networks:
+#            es_bridge:
+#        environment:
+#            ENDPOINT_PORT: 8000
+#            ENDPOINT_BASE: petclinic-server
+#            ENDPOINT_PROTOCOL: http
+#            DATA_FILES: "/opt/data_files"
+#        depends_on:
+#            - petclinic-server
 
 #    client-loadgen:
 #        image: training/client-loadgen:2.0.0
