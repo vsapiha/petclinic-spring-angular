@@ -26,7 +26,7 @@ RUN git clone https://github.com/vsapiha/petclinic-spring-angular.git && \
 
 WORKDIR /home/elastic
 
-RUN cp -v /usr/src/java-code/spring-petclinic/target/spring-petclinic-1.5.16.jar /home/elastic/
+RUN cp -v /usr/src/java-code/petclinic-spring-angular/target/spring-petclinic-1.5.16.jar /home/elastic/
 
 COPY conf/ /home/elastic
 COPY scripts/ /root/start-scripts/

@@ -7,4 +7,4 @@ then
 fi
 
 version=$(eval echo \$\{STACK_VERSION\})
-docker build --no-cache --build-arg version=$version -t training/address-finder:$version .
+docker build --build-arg version=$version -t training/address-finder:$version .
